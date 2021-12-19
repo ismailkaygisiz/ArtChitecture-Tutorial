@@ -1,0 +1,5 @@
+- [Hoş Geldiniz](/)
+- [Başlamadan Önce](before.md)
+- [Başlayalım](docs.md)
+- [ArtChitecture.Snippets](snippets.md)
+- [Hakkında](about.md)
