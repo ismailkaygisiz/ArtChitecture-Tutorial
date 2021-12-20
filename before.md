@@ -67,7 +67,7 @@
     - #### Veritabanı Yapılandırma
     > ArtChitecture default olarak bir veritabanı yapılandırmasıyla gelmektedir. Bu yapıyla beraber önce veritabanı oluşacaktır. Daha sonra Türkçe, İngilizce dil desteği bu dillere ait çeviriler, Admin ve User kullanıcı rolleri oluşacaktır.
     >
-    > NOT: Bu yapı sadece SqlServer için test edilmiştir !
+    > NOT: Bu yapı sadece `Microsoft SQLServer` için test edilmiştir !
     > 
     > `Visual Studio 2019` üzerinde `Package Manager Console` çalıştırılır. Daha sonra default project olarak `DataAccess` seçilir 
     >
@@ -79,7 +79,7 @@
     ```
     > Komutu Package Manage Console üzerinde çalıştırılır.
     >
-    > Komutu çalıştırdıktan sonra hata almadıysanız veritabanınız başarıyla oluşmuş olması gerekmektedir.
+    > Komutu çalıştırdıktan sonra hata almadıysanız veritabanınızın başarıyla oluşmuş olması gerekmektedir.
 
     - #### Projeyi Çalıştırma
     > Tüm işlemleri başarıyla tamamladıktan sonra projenin sağlıklı şekilde kurulduğunu test etmek amacıyla proje çalıştırılır.
