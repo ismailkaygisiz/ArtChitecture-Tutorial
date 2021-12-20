@@ -57,27 +57,36 @@
 
     - #### Proje Oluşturma
     > Eklenti kurulumu yapıldıktan sonra Visual Studio çalıştırılır ve proje oluşturma ekranında ArtChitecture seçilir.
-    >
+
+    ![ArtChitecture Project Create](tutorial-images/visual-studio-create-artchitecture-project.png)
+    
     > Proje oluşturulduktan sonra bir süre beklemeniz gerekiyor bağımlılıkların sağlıklı bir şekilde çözümlenmesi için.
     > 
     > Daha sonra `WebAPI` içinde bulunan `appsettings.json` dosyası içinde konfigürasyonları kendi projenize uygun olacak şekilde yapınız.
     >
     > Bu işlemden sonra `WebAPI` projesi başlangıç projesi olarak işaretlenmelidir. Bunun için `WebAPI` projesine sağ tıklayıp başlangıç projesi olarak ayarla seçeneğini işaretlemelisiniz.
+
+    ![Başlangıç Projesi Olarak İşaretle](tutorial-images/visual-studio-set-startup-project.png)
     
     - #### Veritabanı Yapılandırma
-    > ArtChitecture default olarak bir veritabanı yapılandırmasıyla gelmektedir. Bu yapıyla beraber önce veritabanı oluşacaktır. Daha sonra Türkçe, İngilizce dil desteği bu dillere ait çeviriler, Admin ve User kullanıcı rolleri oluşacaktır.
+    > ArtChitecture default olarak bir veritabanı yapılandırmasıyla gelmektedir. 
+    > Bu yapıyla beraber önce veritabanı oluşacaktır. 
+    > Daha sonra Türkçe, İngilizce dil desteği bu dillere ait çeviriler, Admin ve User kullanıcı rolleri oluşacaktır.
     >
-    > NOT: Bu yapı sadece `Microsoft SQLServer` için test edilmiştir !
+    > NOT: Bu yapı sadece `Microsoft SQL Server` için test edilmiştir !
     > 
     > `Visual Studio 2019` üzerinde `Package Manager Console` çalıştırılır. Daha sonra default project olarak `DataAccess` seçilir 
     >
     > NOT: Bu esnada `Başlangıç Projesinin` `WebAPI` olduğundan emin olun 
-    >
+    
+    ![Package Manager Console](tutorial-images/visual-studio-open-package-manager-console.png)
+
+    ![Default Project](tutorial-images/visual-studio-package-manager-console-default-project.png)
     > 
     ```
     Update-Database -context ProjectDbContext
     ```
-    > Komutu Package Manage Console üzerinde çalıştırılır.
+    > Komutu `Package Manager Console` üzerinde çalıştırılır.
     >
     > Komutu çalıştırdıktan sonra hata almadıysanız veritabanınızın başarıyla oluşmuş olması gerekmektedir.
 
@@ -105,7 +114,9 @@
 
     - #### Proje Oluşturma
     > Eklenti kurulumu yapıldıktan sonra Visual Studio çalıştırılır ve proje oluşturma ekranında AngularUI seçilir (ArtChitecture.AngularUI).
-    >
+
+    ![ArtChitecture Project Create](tutorial-images/visual-studio-create-artchitecture-angular-project.png)
+
     > NOT: Bu aşamada öncesinde `ArtChitecture` projesi oluşturduysanız proje çözümü(solution) üzerinde sağ tıklayıp yeni proje olarak da ekleyebilirsiniz.
     > 
     > Eğer visual studio kullanarak kurulumu yaptıysanız başlangıç projesi olarak AngularUI seçip projeyi çalıştırın. 
@@ -133,7 +144,9 @@
 
     - #### Proje Oluşturma
     > Eklenti kurulumu yapıldıktan sonra Visual Studio çalıştırılır ve proje oluşturma ekranında FlutterUI seçilir (ArtChitecture.FlutterUI).
-    >
+
+    ![ArtChitecture Project Create](tutorial-images/visual-studio-create-artchitecture-flutter-project.png)
+
     > NOT: Bu aşamada öncesinde `ArtChitecture` projesi oluşturduysanız proje çözümü(solution) üzerinde sağ tıklayıp yeni proje olarak da ekleyebilirsiniz.
     > 
     > Eğer visual studio kullanarak kurulumu yaptıysanız başlangıç projesi olarak FlutterUI seçip projeyi çalıştırın. 
