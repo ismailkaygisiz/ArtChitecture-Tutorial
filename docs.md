@@ -58,7 +58,7 @@
     > 
     > `Package Manager Console` açılır Default Project `DataAccess` seçilir.
     > 
-    > NOT: Başlangıç projenizin `WebAPI` olması gerekmektedir.
+    > `NOT` Başlangıç projenizin `WebAPI` olması gerekmektedir.
     > ```
     > add-migration Animal -Context ProjectDbContext -StartupProject WebAPI -Project DataAccess
     > ```
@@ -67,7 +67,7 @@
     > Migration oluştuktan sonra önünüze ilgili migration sınıfı gelecektir.
     > ![Example Migration](tutorial-images/artchitecture-example-migration.png)
     > 
-    > NOT: Bu sınıfı kontrol etmeden veritabanını güncellemeyin !
+    > `NOT` Bu sınıfı kontrol etmeden veritabanını güncellemeyin !
     > 
     > Eğer herhangi bir hata almadıysanız ve migration istediğiniz gibi oluştuysa
     > ```
@@ -77,7 +77,7 @@
     >
     > Hata almadıysanız tablonuzun başarıyla oluşmuş olması gerekmektedir.
     >
-    >`NOT:` Bu yöntem sadece `Microsoft SQL Server` için test edilmiştir. Diğer veritabanlarında hata alabilirsiniz.
+    >`NOT` Bu yöntem sadece `Microsoft SQL Server` için test edilmiştir. Diğer veritabanlarında hata alabilirsiniz.
 
 - #### Db First Yöntemi
     > Veritabanı tablosunu el ile eklediğimiz yöntemdir.
@@ -133,26 +133,711 @@
 ---
 
 ### Service Oluşturma
-
-### Service Özelleştirme
+> `Service`, `Dal` ve `Controller` arasında bulunarak denetim yapmamızı sağlayan nesnelerdir.
+> `Sevice` nesneleri sayesinde gelen verinin kontrolünü sağlayabilir ve buna göre işlem yapabiliriz.
+> Bir `Service` nesnesi oluşturalım
+> `Service` nesnesi için solution içinde bulunan `Business` projesi içindeki `Abstract` klasörüne sağ tıklayıp `Add->New Item` seçeneğini seçelim 
+> Açılan ekranda `interface` seçip isim olarak `IAnimalService` verip `Add` butonuna basalım.
+> ![Create Service](tutorial-images/artchitecture-create-service.png)
+>
+> Daha sonra açılan dosyaya aşağıdaki kod bloğunu ekleyelim
+> ```cs
+> using Core.Business;
+> using Entities.Concrete;
+>
+> namespace Business.Abstract
+> {
+>    public interface IAnimalService : IServiceRepository<Animal, int>
+>    {
+>    }
+> }
+> ```
+> Bu işlemden sonra solution içinde bulunan `Business` projesi içindeki `Concrete` klasörüne sağ tıklayıp `Add->New Item` seçeneğini seçelim 
+> Açılan ekranda `class` seçip isim olarak `AnimalManager` verip `Add` butonuna basalım.
+> ![Create Manager](tutorial-images/artchitecture-create-manager.png)
+> 
+> Daha sonra açılan dosyaya aşağıdaki kod bloğunu ekleyelim
+> ```cs
+> using Business.Abstract;
+>
+> namespace Business.Concrete
+> {
+>    public class AnimalManager : BusinessService, IAnimalService
+>    {
+>    }
+> }
+> ```
+> Bu kodu ekledikten sonra bir hata ile karşılaşacaksınız.
+> Hatayı çözmek için `IAnimalService` `interface'ini` implemente etmeniz gerekmektedir.
+> Implemente etmek için hata veren yere mouse imlecini getirip `Ctrl + .` tuş kombinasyonunu uygulayıp Implement interface seçeneğini seçmelisiniz. 
+> Eğer `Ctrl + .` sizin için çalışmadıysa yanda çıkan ampul ile de aynı işlemi gerçekleştirebilirsiniz.
+> ![Implement interface](tutorial-images/artchitecture-implement-interface.png)
+>
+> Bütün işlemleri gerçekleştirdikten sonra dosyanın son hali aşağıdaki gibi olmalıdır.
+> ```cs
+> using Business.Abstract;
+> using Core.Utilities.Results.Abstract;
+> using Entities.Concrete;
+> using System.Collections.Generic;
+> 
+> namespace Business.Concrete
+> {
+>    public class AnimalManager : BusinessService, IAnimalService
+>    {
+>        public IResult Add(Animal entity)
+>        {
+>            throw new System.NotImplementedException();
+>        }
+>
+>        public IResult Delete(Animal entity)
+>        {
+>            throw new System.NotImplementedException();
+>        }
+>
+>        public IDataResult<List<Animal>> GetAll()
+>        {
+>            throw new System.NotImplementedException();
+>        }
+>
+>        public IDataResult<Animal> GetById(int id)
+>        {
+>            throw new System.NotImplementedException();
+>        }
+>
+>        public IResult Update(Animal entity)
+>        {
+>            throw new System.NotImplementedException();
+>        }
+>    }
+> }
+> ```
+>
+> Tebrikler `Animal` nesnesi için bir `Service` nesnesi oluşturdunuz. 
 
 ### Dal ve Service'i Birlikte Kullanma
+> `Service` nesnelerinin içinde `Dal` nesnesi kullanmak için `Dependency Injection` yöntemini kullanırız.
+> Yapıcı methoda parametre olarak verilen nesne için gerekli referans `IoC Container` tarafından otomatik olarak atanır.
+> Bu sayede bir sınıfın örneğine başka projelerden de erişebiliriz. 
+>
+> Örnek kullanım aşağıdaki gibidir.
+> ```cs
+> private readonly IAnimalDal _animalDal;
+>
+> public AnimalManager(IAnimalDal animalDal)
+> {
+>    _animalDal = animalDal;
+> }
+> ```
+> `NOT` Kod bloğunu ekledikten sonra gerekli importları yapmanız gerekmektedir.
+> 
+> Bu kod bloğunu da ekledikten sonra sınıfın son hali aşağıdaki gibi olmalıdır.
+>
+> ```cs
+> public class AnimalManager : BusinessService, IAnimalService
+> {
+>   private readonly IAnimalDal _animalDal;
+>
+>   public AnimalManager(IAnimalDal animalDal)
+>   {
+>       _animalDal = animalDal;
+>   }
+>
+>   public IResult Add(Animal entity)
+>   {
+>       throw new System.NotImplementedException();
+>   }
+>
+>   public IResult Delete(Animal entity)
+>   {
+>       throw new System.NotImplementedException();
+>   }
+>
+>   public IDataResult<List<Animal>> GetAll()
+>   {
+>       throw new System.NotImplementedException();
+>   }
+>
+>   public IDataResult<Animal> GetById(int id)
+>   {
+>       throw new System.NotImplementedException();
+>   }
+>
+>   public IResult Update(Animal entity)
+>   {
+>        throw new System.NotImplementedException();
+>   }
+> }
+> ```
+> Bu adımı da tamamladıktan sonra artık oluşturduğumuz `Dal` sınıfını kullanabiliriz.
+> 
+> `Dal` nesnesini kullanmadan önce tam olarak ne yaptığını iyice anlamamız gerekiyor.
+> 
+> `Dal` nesnesi, veritabanı işlemlerindeki uğraşı minimum düzeye indirmek için kullandığımız bir yardımcıdır.
+> Bu sayede her nesne ve tablo için ekstra kod yazmadan veritabanı işlemlerini halledebiliriz.
+> 
+> `Add` - `Delete` - `Update` - `Get` - `GetAll` metotlarına gömülü olarak sahiptir.
+>
+> `Add` metodu sayesinde ilgili nesneyi tabloya ekleriz.
+> 
+> `Delete` metodu sayesinde ilgili nesneyi tablodan sileriz.
+> 
+> `Update` metodu sayesinde tablodaki ilgili nesneyi güncelleriz.
+>
+> `Get` metodu sayesinde tablodan parametre olarak girilen koşulu sağlayan nesneyi alabiliriz. (Tekil nesneler için kullanılır) 
+> 
+> `GetAll` metodu sayesinde tablodan parametre olarak girilen koşulu sağlayan nesneyleri alabiliriz. (Çoğul nesneler için kullanılır)
+>
+> `GetAll` için parametre değeri verilmezse bütün tabloyu almamızı sağlar.
+> 
+> Eğer istersek `Dal` nesneleri için özel metotlar oluşturup kullanımı pratikleştirebiliriz.
+> 
+> `Dal` nesnesinin neden kullanıldığını artık anladığımıza göre şimdi kullanımını görelim.
+> 
+> ```cs
+> public IResult Add(Animal entity)
+> {
+>   _animalDal.Add(entity);
+>   return new SuccessResult("Animal Added");
+> }
+> 
+> public IResult Delete(Animal entity)
+> {
+>   _animalDal.Delete(entity);
+>   return new SuccessResult("Animal Deleted");
+> }
+> 
+> public IResult Update(Animal entity)
+> {
+>   _animalDal.Update(entity);
+>   return new SuccessResult("Animal Updated");
+> }
+> 
+> public IDataResult<Animal> GetById(int id)
+> {
+>   return new SuccessDataResult<Animal>(_animalDal.Get(animal => animal.Id == id));
+> }
+> 
+> public IDataResult<List<Animal>> GetAll()
+> {
+>   return new SuccessDataResult<List<Animal>>(_animalDal.GetAll());
+> }
+> ```
+>
+> Bütün işlemleri gerçekleştirdikten sonra sınıfın en son hali aşağıdaki gibi olmalıdır.
+> ```cs
+> public class AnimalManager : BusinessService, IAnimalService
+> {
+>    private readonly IAnimalDal _animalDal;
+>
+>    public AnimalManager(IAnimalDal animalDal)
+>    {
+>        _animalDal = animalDal;
+>    }
+> 
+>    public IResult Add(Animal entity)
+>    {
+>        _animalDal.Add(entity);
+>        return new SuccessResult("Animal Added");
+>    }
+>
+>    public IResult Delete(Animal entity)
+>    {
+>        _animalDal.Delete(entity);
+>        return new SuccessResult("Animal Deleted");
+>    }
+>
+>    public IDataResult<List<Animal>> GetAll()
+>    {
+>        return new SuccessDataResult<List<Animal>>(_animalDal.GetAll());
+>    }
+>
+>    public IDataResult<Animal> GetById(int id)
+>    {
+>        return new SuccessDataResult<Animal>(_animalDal.Get(animal => animal.Id == id));
+>    }
+>
+>    public IResult Update(Animal entity)
+>    {
+>        _animalDal.Update(entity);
+>        return new SuccessResult("Animal Deleted");
+>    }
+> }
+> ```
+> 
+> Artık `Dal` ve `Service` nesnelerini birlikte kullanabiliriz.
 
+### Service Özelleştirme
+> Service özelleştirme işlemini `Service` nesnelerine harici metot eklemek
+> olarak tanımlayabiliriz.
+>
+> `Service` nesnesine yeni bir metot eklemek aslında çok kolaydır.
+>
+> Aşağıda bulunan kod bloğunu `IAnimalService` içine ekliyoruz.
+> ```cs
+> IDataResult<List<Animal>> GetByAnimalName(string animalName);
+> ```
+> 
+> Kod bloğunu ekledikten sonra son hali aşağıdaki gibi olmalıdır.
+>
+> ```cs
+> using Core.Business;
+> using Core.Utilities.Results.Abstract;
+> using Entities.Concrete;
+> using System.Collections.Generic;
+>
+> namespace Business.Abstract
+> {
+>    public interface IAnimalService : IServiceRepository<Animal, int>
+>    {
+>        IDataResult<List<Animal>> GetByAnimalName(string animalName);
+>    }
+> }
+> ```
+> Daha sonra metodu `AnimalManager` içinde `implement` ediyoruz.
+> Aksi takdirde program hata verir.
+> 
+> Aşağıda nasıl implement yapılacağı gösterilmektedir.
+> ![Impelent](tutorial-images/artchitecture-implement-method.png)
+> 
+> Metodu implement ettikten sonra metodun içini silip aşağıdaki kod 
+> bloğunu ekliyoruz.
+> ```cs
+> 
+> return new SuccessDataResult<List<Animal>>(_animalDal.GetAll(animal => animal.Name == animalName));
+> ``` 
+>
+> Bu işlemden sonra dosyanın son hali aşağıdaki gibi olmalıdır.
+> ```cs
+> using Business.Abstract;
+> using Core.Utilities.Results.Abstract;
+> using Core.Utilities.Results.Concrete;
+> using DataAccess.Abstract;
+> using Entities.Concrete;
+> using System.Collections.Generic;
+>
+> namespace Business.Concrete
+> {
+>    public class AnimalManager : BusinessService, IAnimalService
+>    {
+>        private readonly IAnimalDal _animalDal;
+>
+>        public AnimalManager(IAnimalDal animalDal)
+>        {
+>            _animalDal = animalDal;
+>        }
+>        public IResult Add(Animal entity)
+>        {
+>            _animalDal.Add(entity);
+>            return new SuccessResult("Animal Added");
+>        }
+>
+>        public IResult Delete(Animal entity)
+>        {
+>            _animalDal.Delete(entity);
+>            return new SuccessResult("Animal Deleted");
+>        }
+>
+>        public IDataResult<List<Animal>> GetAll()
+>        {
+>            return new SuccessDataResult<List<Animal>>(_animalDal.GetAll());
+>        }
+>
+>        public IDataResult<List<Animal>> GetByAnimalName(string animalName)
+>        {
+>            return new SuccessDataResult<List<Animal>>(_animalDal.GetAll(animal => animal.Name == animalName));
+>        }
+>
+>        public IDataResult<Animal> GetById(int id)
+>        {
+>            return new SuccessDataResult<Animal>(_animalDal.Get(animal => animal.Id == id));
+>        }
+>
+>        public IResult Update(Animal entity)
+>        {
+>            _animalDal.Update(entity);
+>            return new SuccessResult("Animal Deleted");
+>        }
+>    }
+> }
+> ```
+> Artık özelleştirilmiş bir `Service` nesneniz var.
 ---
 
 ### Controller Oluşturma
+> `Controller` Client ile Service arasındaki iletişimi sağlayan nesne olarak tanımlanabilir.
+>
+> Bu proje bir API projesi olduğu için clientlar http isteğinde bulunduğu zaman `Controller` ile etkileşime geçmektedir. `Controller` dosyaları mümkün olduğunca temiz bırakılmalıdır, gereksiz kod yazılmamalıdır.
+> 
+> Bir `Controller` nesnesi oluşturalım. `Controller` nesnesi içi solution içinde bulunan `WebAPI` projesi içindeki `Controllers` klasörüne sağ tıklayıp `Add->Class` seçeneğini seçelim. Açılan sekmede isim olarak `AnimalsController` verip `Add` butonuna basalım. 
+>
+> ![Create Controller](tutorial-images/artchitecture-create-controller.png)
+> 
+> Daha sonra dosyanın içine aşağıdaki kod bloğunu ekleyelim.
+> ```cs
+> using Business.Abstract;
+> using Entities.Concrete;
+> using Microsoft.AspNetCore.Mvc;
+> using WebAPI.Controllers;
+>
+> public class AnimalsController : ControllerRepository<Animal, int>
+> {
+>    private readonly IAnimalService _animalService;
+>
+>    public AnimalsController(IAnimalService animalService) : base(animalService)
+>    {
+>        _animalService = animalService;
+>    }
+> }
+> ```
+> `ControllerRepository` bizim için `Add`, `Delete`, `Update`, `GetById`, `GetAll` metotlarını otomatik olarak kaydedecektir. Bu yüzden bunlar için özel metotlar oluşturmamıza gerek yok. 
 
 ### Controller Özelleştirme
+> `Controller` özelleştirme işlemini `Controller` nesnelerine harici metot eklemek olarak tanımlayabiliriz.
+> 
+> `Controller` nesnesine yeni bir metot eklemek aslında çok kolaydır.
+>
+> Aşağıda bulunan kod bloğunu `AnimalsController` içine ekleyelim.
+> ```cs
+> [HttpGet("[action]")]
+> public IActionResult GetByAnimalName(string animalName)
+> {
+>   var result = _animalService.GetByAnimalName(animalName);
+>    if (result.Success) 
+>       return Ok(result);
+>       
+>    return BadRequest(result);
+> }
+> ```
+> Kod bloğunu ekledikten sonra son hali aşağıdaki gibi olmalıdır.
+> ```cs
+> using Business.Abstract;
+> using Entities.Concrete;
+> using Microsoft.AspNetCore.Mvc;
+> using WebAPI.Controllers;
+>
+> public class AnimalsController : ControllerRepository<Animal, int>
+> {
+>    private readonly IAnimalService _animalService;
+>
+>    public AnimalsController(IAnimalService animalService) : base(animalService)
+>   {
+>        _animalService = animalService;
+>    }
+>
+>    [HttpGet("[action]")]
+>    public IActionResult GetByAnimalName(string animalName)
+>    {
+>        var result = _animalService.GetByAnimalName(animalName);
+>        if (result.Success) 
+>            return Ok(result);
+>        
+>        return BadRequest(result);
+>    }
+> }
+> ```
+> 
+> Artık özelleştirilmiş bir `Controller` nesneniz var.
 
-### Service ve Controller'ı Birlikte Kullanma 
-
+### Controller'ı Service Olmadan Kullanma
+> Bazen herhangi bir `Service` nesnesine bağlı kalmak istemeyiz böyle durumlarda `Controller` nesnesini bu bölümde anlatıldığı gibi kullanmak daha basit ve mantıklı olur.
+>
+> Bu nesneler yine `Service` nesnleriyle bağlantıyı sağlayabilir. `AnimalsController` nesnesinden farklı olarak `Add`, `Delete`, `Update`, `GetById`, `GetAll` işlemlerini içermemektedir (Harici olarak ekleyebilirsiniz).
+> Daha fazla bilgi almak için `WebAPI->Controllers->AuthController.cs` dosyasını inceleyebilirsiniz.
+> ```cs
+> using Microsoft.AspNetCore.Mvc;
+> using Controller = WebAPI.Controllers.Controller;
+>
+> namespace WebAPI.Controllers
+> {
+>    public class ControllerWithoutService : Controller
+>    {
+>        public ControllerWithoutService()
+>        {
+>
+>        }
+>    }
+> }
+> ```
+> `NOT` Bu alanı mevcut projenize eklemenize gerek bulunmamaktadır.
 ---
 
 ### Bağımlılıkları Çözme
+> Mevcut durumda projeyi çalıştırıp `Animal` nesnesini etkileyecek herhangi bir istekte bulunduğunuz zaman hata alacaksınız.
+> Bu hatayı çözmek için `Business->DependencyResolvers->Autofac` içinde bulunan `AutofacBusinessModule.cs` dosyasını açalım.
+> 
+> Aşağıda bulunan kod bloğunu `Load` metodunun içine ekleyelim.
+> ```cs
+> builder.RegisterType<EfAnimalDal>().As<IAnimalDal>().SingleInstance();
+> builder.RegisterType<AnimalManager>().As<IAnimalService>().SingleInstance();
+> ```
+> Bu işlemi yaptıktan sonra dosyanın son hali aşağıdaki gibi olmalıdır.
+> ```cs
+> using Autofac;
+> using Autofac.Extras.DynamicProxy;
+> using Business.Abstract;
+> using Business.Concrete;
+> using Business.Helpers;
+> using Castle.DynamicProxy;
+> using Core.Entities.Concrete;
+> using Core.Utilities.Interceptors;
+> using Core.Utilities.Security.JWT;
+> using DataAccess.Abstract;
+> using DataAccess.Concrete.EntityFramework;
+> using System.Reflection;
+> using Module = Autofac.Module;
+>
+> namespace Business.DependencyResolvers.Autofac
+> {
+>    public class AutofacBusinessModule : Module
+>    {
+>        protected override void Load(ContainerBuilder builder)
+>        {
+>            builder.RegisterType<EfAnimalDal>().As<IAnimalDal>().SingleInstance();
+>            builder.RegisterType<AnimalManager>().As<IAnimalService>().SingleInstance();
+>
+>            // DataAccessLayer
+>            builder.RegisterType<EfOperationClaimDal>().As<IOperationClaimDal>().SingleInstance();
+>            builder.RegisterType<EfUserOperationClaimDal>().As<IUserOperationClaimDal>().SingleInstance();
+>            builder.RegisterType<EfUserDal>().As<IUserDal>().SingleInstance();
+>            builder.RegisterType<EfLanguageDal>().As<ILanguageDal>().SingleInstance();
+>            builder.RegisterType<EfTranslateDal>().As<ITranslateDal>().SingleInstance();
+>            builder.RegisterType<EfRefreshTokenDal>().As<IRefreshTokenDal>().SingleInstance();
+>
+>            // BusinessLayer
+>            builder.RegisterType<AuthManager>().As<IAuthService>().SingleInstance();
+>            builder.RegisterType<OperationClaimManager>().As<IOperationClaimService>().SingleInstance();
+>            builder.RegisterType<UserOperationClaimManager>().As<IUserOperationClaimService>().SingleInstance();
+>            builder.RegisterType<UserManager>().As<IUserService>().SingleInstance();
+>            builder.RegisterType<LanguageManager>().As<ILanguageService>().SingleInstance();
+>            builder.RegisterType<TranslateManager>().As<ITranslateService>().SingleInstance();
+>            builder.RegisterType<RefreshTokenManager>().As<IRefreshTokenService>().SingleInstance();
+>
+>            builder.RegisterType<RefreshTokenHelper>().As<IRefreshTokenHelper>().SingleInstance();
+>
+>            // CoreLayer
+>            builder.RegisterType<JwtHelper>().As<ITokenHelper<User>>().SingleInstance();
+>
+>            // Interceptors
+>            var assembly = Assembly.GetExecutingAssembly();
+>            builder.RegisterAssemblyTypes(assembly).AsImplementedInterfaces()
+>                .EnableInterfaceInterceptors(new ProxyGenerationOptions
+>                {
+>                    Selector = new AspectInterceptorSelector()
+>                }).SingleInstance();
+>        }
+>    }
+> }
+> ```
 
 ### İş Kuralları Yazma
-
+> İş kuralları sayesinde nesne üzerinde işlem yapmadan önce gerekli kuralları sağlayıp sağlamadığına bakabilir ve buna göre işlem yapmasını sağlayabiliriz.
+>
+> `BusinessRules` sınıfı iş kuralı yazmayı kolaylaştırmak için özel olarak oluşturulmuştur.
+>
+> Aşağıda bulunan kod bloğunu `AnimalManager` içine ekleyelim
+> ```cs
+> private IResult CheckIfAnimalNameIsAlreadyExistsForOwner(Animal animal)
+> {
+>    animal = GetByAnimalName(animal.Name).Data.Find(a=>a.OwnerName == animal.OwnerName);
+>
+>    if(animal != null)
+>    {
+>        return new ErrorResult("Animal is already exists for owner");
+>    }
+>
+>    return new SuccessResult();
+> }
+> ```
+> Daha sonra `AnimalManager` içinde bulunan `Add` metodunu aşağıdaki gibi düzenleyelim.
+> ```cs
+> public IResult Add(Animal entity)
+> {
+>    var result = BusinessRules.Run(CheckIfAnimalNameIsAlreadyExistsForOwner(entity));
+>
+>    if (!result.Success)
+>        return result;
+>
+>    _animalDal.Add(entity);
+>    return new SuccessResult("Animal Added");
+> }
+> ```
+> Bu işlemden sonra dosyanın son hali aşağıdaki gibi olmalıdır.
+> ```cs
+> using Business.Abstract;
+> using Core.Business;
+> using Core.Utilities.Results.Abstract;
+> using Core.Utilities.Results.Concrete;
+> using DataAccess.Abstract;
+> using Entities.Concrete;
+> using System.Collections.Generic;
+> 
+> namespace Business.Concrete
+> {
+>    public class AnimalManager : BusinessService, IAnimalService
+>    {
+>        private readonly IAnimalDal _animalDal;
+>
+>        public AnimalManager(IAnimalDal animalDal)
+>        {
+>            _animalDal = animalDal;
+>        }
+> 
+>        public IResult Add(Animal entity)
+>        {
+>            var result = BusinessRules.Run(CheckIfAnimalNameIsAlreadyExistsForOwner(entity));
+>
+>            if (!result.Success)
+>                return result;
+>
+>            _animalDal.Add(entity);
+>            return new SuccessResult("Animal Added");
+>        }
+>
+>        public IResult Delete(Animal entity)
+>        {
+>            _animalDal.Delete(entity);
+>            return new SuccessResult("Animal Deleted");
+>        }
+>
+>        public IDataResult<List<Animal>> GetAll()
+>        {
+>            return new SuccessDataResult<List<Animal>>(_animalDal.GetAll());
+>        }
+>
+>        public IDataResult<List<Animal>> GetByAnimalName(string animalName)
+>        {
+>            return new SuccessDataResult<List<Animal>>(_animalDal.GetAll(animal => animal.Name == animalName));
+>        }
+>
+>        public IDataResult<Animal> GetById(int id)
+>        {
+>            return new SuccessDataResult<Animal>(_animalDal.Get(animal => animal.Id == id));
+>        }
+>
+>        public IResult Update(Animal entity)
+>        {
+>            _animalDal.Update(entity);
+>            return new SuccessResult("Animal Deleted");
+>        }
+>
+>        private IResult CheckIfAnimalNameIsAlreadyExistsForOwner(Animal animal)
+>        {
+>            animal = GetByAnimalName(animal.Name).Data.Find(a=>a.OwnerName == animal.OwnerName);
+>
+>            if(animal != null)
+>            {
+>                return new ErrorResult("Animal is already exists for owner");
+>            }
+>
+>            return new SuccessResult();
+>        }
+>    }
+> }
+> ```
 ### Validasyon Yazma
+> Validasyonlar sayesinde nesne üzerinde işlem yapmadan önce koyduğumuz şartlara uyup uymadığına bakabiliriz.
+>
+> `Business->ValidationRules->FluentValidation` klasörüne sağ tıklayıp `Add->New Item` seçeneğini seçip açılan ekranda `AnimalValidator` ismini verip `Add` butonuna basın.
+> 
+> Daha sonra aşağıdaki kod bloğunu dosyaya ekleyin.
+> ```cs
+> using Entities.Concrete;
+> using FluentValidation;
+>
+> namespace Business.ValidationRules.FluentValidation
+> {
+>    public class AnimalValidator : FluentValidator<Animal>
+>    {
+>        public AnimalValidator()
+>        {
+>            RuleFor(animal => animal.Name).NotNull().WithMessage("Animal name can not be null");
+>            RuleFor(animal => animal.Name).MinimumLength(2);
+>        }
+>    }
+> }
+> ```
+> `NOT` Daha Fazlası için [Fluent Validation Dökümanını İnceleyebilirsiniz](https://docs.fluentvalidation.net/en/latest/)
+>
+> Daha sonra `AnimalManager` içinde bulunan `Add` metodunun üzerine aşağıdaki ifadeyi ekleyin.
+> ```cs
+> [ValidationAspect(typeof(AnimalValidator))]
+> ```
+> Bu işlemden sonra dosyanın son hali aşağıdaki gibi olmalıdır.
+> ```cs
+> using Business.Abstract;
+> using Business.ValidationRules.FluentValidation;
+> using Core.Aspects.Autofac.Validation;
+> using Core.Business;
+> using Core.Utilities.Results.Abstract;
+> using Core.Utilities.Results.Concrete;
+> using DataAccess.Abstract;
+> using Entities.Concrete;
+> using System.Collections.Generic;
+> 
+> namespace Business.Concrete
+> {
+>    public class AnimalManager : BusinessService, IAnimalService
+>    {
+>        private readonly IAnimalDal _animalDal;
+>
+>        public AnimalManager(IAnimalDal animalDal)
+>        {
+>            _animalDal = animalDal;
+>        }
+>
+>        [ValidationAspect(typeof(AnimalValidator))]
+>        public IResult Add(Animal entity)
+>        {
+>            var result = BusinessRules.Run(CheckIfAnimalNameIsAlreadyExistsForOwner(entity));
+>
+>            if (!result.Success)
+>                return result;
+>
+>            _animalDal.Add(entity);
+>            return new SuccessResult("Animal Added");
+>        }
+>
+>        public IResult Delete(Animal entity)
+>        {
+>            _animalDal.Delete(entity);
+>            return new SuccessResult("Animal Deleted");
+>        }
+>
+>        public IDataResult<List<Animal>> GetAll()
+>        {
+>            return new SuccessDataResult<List<Animal>>(_animalDal.GetAll());
+>        }
+>
+>        public IDataResult<List<Animal>> GetByAnimalName(string animalName)
+>        {
+>            return new SuccessDataResult<List<Animal>>(_animalDal.GetAll(animal => animal.Name == animalName));
+>        }
+>
+>        public IDataResult<Animal> GetById(int id)
+>        {
+>            return new SuccessDataResult<Animal>(_animalDal.Get(animal => animal.Id == id));
+>        }
+>
+>        public IResult Update(Animal entity)
+>        {
+>            _animalDal.Update(entity);
+>            return new SuccessResult("Animal Deleted");
+>        }
+>
+>        private IResult CheckIfAnimalNameIsAlreadyExistsForOwner(Animal animal)
+>        {
+>            animal = GetByAnimalName(animal.Name).Data.Find(a=>a.OwnerName == animal.OwnerName);
+>
+>            if(animal != null)
+>            {
+>                return new ErrorResult("Animal is already exists for owner");
+>            }
+>
+>            return new SuccessResult();
+>        }
+>    }
+> }
+> ```  
 
 ---
 
