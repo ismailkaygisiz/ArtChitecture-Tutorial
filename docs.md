@@ -285,7 +285,7 @@
 >
 > `Get` metodu sayesinde tablodan parametre olarak girilen koşulu sağlayan nesneyi alabiliriz. (Tekil nesneler için kullanılır) 
 > 
-> `GetAll` metodu sayesinde tablodan parametre olarak girilen koşulu sağlayan nesneyleri alabiliriz. (Çoğul nesneler için kullanılır)
+> `GetAll` metodu sayesinde tablodan parametre olarak girilen koşulu sağlayan nesneleri alabiliriz. (Çoğul nesneler için kullanılır)
 >
 > `GetAll` için parametre değeri verilmezse bütün tabloyu almamızı sağlar.
 > 
@@ -359,7 +359,7 @@
 >    public IResult Update(Animal entity)
 >    {
 >        _animalDal.Update(entity);
->        return new SuccessResult("Animal Deleted");
+>        return new SuccessResult("Animal Updated");
 >    }
 > }
 > ```
@@ -541,7 +541,7 @@
 ### Controller'ı Service Olmadan Kullanma
 > Bazen herhangi bir `Service` nesnesine bağlı kalmak istemeyiz böyle durumlarda `Controller` nesnesini bu bölümde anlatıldığı gibi kullanmak daha basit ve mantıklı olur.
 >
-> Bu nesneler yine `Service` nesnleriyle bağlantıyı sağlayabilir. `AnimalsController` nesnesinden farklı olarak `Add`, `Delete`, `Update`, `GetById`, `GetAll` işlemlerini içermemektedir (Harici olarak ekleyebilirsiniz).
+> Bu nesneler yine `Service` nesneleriyle bağlantıyı sağlayabilir. `AnimalsController` nesnesinden farklı olarak `Add`, `Delete`, `Update`, `GetById`, `GetAll` işlemlerini içermemektedir (Harici olarak ekleyebilirsiniz).
 > Daha fazla bilgi almak için `WebAPI->Controllers->AuthController.cs` dosyasını inceleyebilirsiniz.
 > ```cs
 > using Microsoft.AspNetCore.Mvc;
@@ -844,16 +844,338 @@
 ## ArtChitecture.Angular
 
 ### Entity Modelleme
-
+> API tarafında oluşturduğumuz her nesnenin Client tarafında bir karşılığı olması bize geliştirme sürecinde kolaylıklar sağlayacaktır.
+>
+> İlk önce solution içinde bulunan `AngularUI` projesinin içinde bulunan angular-ui dosyasını `Visual Studio Code` editöründe açıyoruz.
+> Angular için gerekli konfigürasyonları kurulum kısmında yapmıştık eğer yapmadıysanız önce konfigürasyonları yapın.
+>
+> Projeyi `Visual Studio Code` editöründe açtıktan sonra `src->app->models` klasörüne sağ tıklayıp `New File` seçeneğini seçiyoruz ve oluşturacağımız dosyaya `animalModel.ts` ismini veriyoruz.
+> ![Create Model](tutorial-images/artchitecture-angular-create-model.png)
+> 
+> Daha sonra dosyanın içine aşağıdaki kod bloğunu ekleyip dosyayı kaydediyoruz.
+> 
+> ```ts
+> export interface AnimalModel {
+>  id: number;
+>  name: string;
+>  ownerName: string;
+> }
+> ```
+> Animal nesnesi için artık Angular tarafında bir modelimiz var.
 ### Service Oluşturma
+> API'ye istek atmak için `HttpClient` kullanırız. Fakat istek attığımız kodu her yere yazarsak bu hem karmaşaya sebep olacaktır hem de ileride projede değişikliğe gidildiğinde sıkıntılara sebep olacaktır.
+> Bu yüzden istekleri tek bir yerden yöntebilmek için `Service` kullanırız.
+>
+> `src->app->services` klasörüne sağ tıklayıp `Open in Integrated Terminal` seçeneğini seçelim. Bu işlem bizim için bu dosyayı terminalde açacaktır.
+> ![Create Service](tutorial-images/artchitecture-angular-create-service.png)
+> 
+> Açılan terminale aşağıdaki komutu yazalım.
+> ```
+> ng generate service animal --skip-tests 
+> ```
+> Bu işlemden sonra eğer hata almazsanız `services` klasörümüzün içine `animal.service.ts` dosyasının oluştuğunu göreceksiniz.
+>
+> Daha sonra dosyanın içine aşağıdaki kod bloğunu ekleyelim.
+> ```ts
+> import { HttpClient } from '@angular/common/http';
+> import { Injectable } from '@angular/core';
+> import { Observable } from 'rxjs';
+> import { apiUrl } from 'src/api';
+> import { DeleteModel } from '../core/models/deleteModel';
+> import { ListResponseModel } from '../core/models/response/listResponseModel';
+> import { ResponseModel } from '../core/models/response/responseModel';
+> import { SingleResponseModel } from '../core/models/response/singleResponseModel';
+> import { ServiceRepository } from '../core/services/service-repository';
+> import { AnimalModel } from '../models/animalModel';
+> 
+> @Injectable({
+>  providedIn: 'root',
+> })
+> export class AnimalService implements ServiceRepository<AnimalModel, number> {
+>  constructor(private httpClient: HttpClient) {}
+>
+>  add(addModel: AnimalModel): Observable<ResponseModel> {
+>    throw new Error('Method not implemented.');
+>  }
+>  delete(deleteModel: DeleteModel): Observable<ResponseModel> {
+>    throw new Error('Method not implemented.');
+>  }
+>  update(updateModel: AnimalModel): Observable<ResponseModel> {
+>    throw new Error('Method not implemented.');
+>  }
+>  getById(id: number): Observable<SingleResponseModel<AnimalModel>> {
+>    throw new Error('Method not implemented.');
+>  }
+>  getAll(): Observable<ListResponseModel<AnimalModel>> {
+>    throw new Error('Method not implemented.');
+>  }
+> }
+> ```
+> Şimdi metodlarımızın içlerini dolduralım.
+> 
+> `Add` metodunu aşağıdaki gibi değiştirelim.
+> ```ts
+> add(addModel: AnimalModel): Observable<ResponseModel> {
+>    return this.httpClient.post<ResponseModel>(
+>    apiUrl + 'animals/add',
+>    addModel
+>    );
+> }
+> ```
+> `Delete` metodunu aşağıdaki gibi değiştirelim.
+> ```ts
+> delete(deleteModel: DeleteModel): Observable<ResponseModel> {
+>    return this.httpClient.post<ResponseModel>(
+>    apiUrl + 'animals/delete',
+>    deleteModel
+>    );
+> }  
+> ```
+> `Update` metodunu aşağıdaki gibi değiştirelim.
+> ```ts
+> update(updateModel: AnimalModel): Observable<ResponseModel> {
+>    return this.httpClient.post<ResponseModel>(
+>    apiUrl + 'animals/update',
+>    updateModel
+>    );
+> }
+> ```
+> `GetById` metodunu aşağıdaki gibi değiştirelim.
+> ```ts
+> getById(id: number): Observable<SingleResponseModel<AnimalModel>> {
+>    return this.httpClient.get<SingleResponseModel<AnimalModel>>(
+>    apiUrl + 'animals/getbyid?id=' + id
+>    );
+> }
+> ```
+> `GetAll` metodunu aşağıdaki gibi değiştirelim.
+> ```ts
+> getAll(): Observable<ListResponseModel<AnimalModel>> {
+>    return this.httpClient.get<ListResponseModel<AnimalModel>>(
+>    apiUrl + 'animals/getall'
+>    );
+> }
+> ```
+> `GetByAnimalName` metodunu da ekleyelim.
+> ```ts
+> getByAnimalName(animalName: string): Observable<ListResponseModel<AnimalModel>> {
+>    return this.httpClient.get<ListResponseModel<AnimalModel>>(
+>    apiUrl + 'animals/getbyanimalname?animalName=' + animalName
+>    );
+> }
+> ```
+> Bütün işlemleri yaptıktan sonra dosyanın son hali aşağıdaki gibi olmalıdır.
+> ```ts
+> import { HttpClient } from '@angular/common/http';
+> import { Injectable } from '@angular/core';
+> import { Observable } from 'rxjs';
+> import { apiUrl } from 'src/api';
+> import { DeleteModel } from '../core/models/deleteModel';
+> import { ListResponseModel } from '../core/models/response/listResponseModel';
+> import { ResponseModel } from '../core/models/response/responseModel';
+> import { SingleResponseModel } from '../core/models/response/singleResponseModel';
+> import { ServiceRepository } from '../core/services/service-repository';
+> import { AnimalModel } from '../models/animalModel';
+>
+> @Injectable({
+>  providedIn: 'root',
+> })
+> export class AnimalService implements ServiceRepository<AnimalModel, number> {
+>  constructor(private httpClient: HttpClient) {}
+>
+>  add(addModel: AnimalModel): Observable<ResponseModel> {
+>    return this.httpClient.post<ResponseModel>(
+>      apiUrl + 'animals/add',
+>      addModel
+>    );
+>  }
+>
+>  delete(deleteModel: DeleteModel): Observable<ResponseModel> {
+>    return this.httpClient.post<ResponseModel>(
+>      apiUrl + 'animals/delete',
+>      deleteModel
+>    );
+>  }
+>
+>  update(updateModel: AnimalModel): Observable<ResponseModel> {
+>    return this.httpClient.post<ResponseModel>(
+>      apiUrl + 'animals/update',
+>      updateModel
+>    );
+>  }
+>
+>  getById(id: number): Observable<SingleResponseModel<AnimalModel>> {
+>    return this.httpClient.get<SingleResponseModel<AnimalModel>>(
+>      apiUrl + 'animals/getbyid?id=' + id
+>    );
+>  }
+>
+>  getAll(): Observable<ListResponseModel<AnimalModel>> {
+>    return this.httpClient.get<ListResponseModel<AnimalModel>>(
+>      apiUrl + 'animals/getall'
+>    );
+>  }
+>
+>  getByAnimalName(animalName: string): Observable<ListResponseModel<AnimalModel>> {
+>    return this.httpClient.get<ListResponseModel<AnimalModel>>(
+>      apiUrl + 'animals/getbyanimalname?animalName=' + animalName
+>    );
+>  }
+> }
+> ```
+> Artık `Controller` nesnemizle tamamen eşleşen bir `Angular Service` nesnemiz var.
 
 ### Component Oluşturma
+> Site üzerindeki genel tasarımı yapmak için html-css kullanırız fakat bazen bir kodu birden fazla yere yazmamız gerekir. İleride sistemde değişikliğe gidildiğinde sıkıntı çıkmaması için bunları tek bir merkezden yönetmek isteriz.
+>
+> `Component` bize bu aşamada kolaylık sağlar.
+> 
+> `src-app-components` klasörüne sağ tıklayıp `Open in Integrated Terminal` seçeneğini seçelim.
+> ![Create Component](tutorial-images/artchitecture-angular-create-component.png)
+> Açılan terminale aşağıdaki komutu yapıştıralım.
+> ```
+> ng generate component animal-list --skip-tests
+> ```
+> Bu işlemden sonra `components` klasörü içinde `animal-list` klasörü oluştuğunu göreceksiniz. Bu klasörün içindeki `animal-list.component.ts` dosyasını açalım.
+> ```ts
+> constructor(private animalService: AnimalService) {}
+> ```
+> Constructor metodunu yukarıdaki gibi değiştirelim.
+>
+> Daha sonra aşağıdaki kodu `AnimalListComponent` sınıfının içine ekleyelim.
+> ```ts
+> animals: AnimalModel[];
+> ```
+> Son olarak da bütün hayvanları getirecek metodu `AnimalListComponent` içine yazalım.
+> ```ts
+> getAllAnimals() {
+>    this.animalService.getAll().subscribe(
+>    (response) => {
+>        this.animals = response.data;
+>    },
+>    (responseError) => {},
+>    () => {}
+>    );
+> }
+> ```
+> Bu işlem bize API aracılığıyla getirdiğimiz, veritabanında bulunan bütün `Animal` nesnelerini `animals` değişkeni içinde tutmamızı sağlayacaktır.
+>
+> Peki ya işlem başarısız olursa ?
+> Bu durumlar için daha önceden yazılmış olan `ValidationService` sınıfını kullanacağız. Siz de bu sınıfı kendi projenize göre özelleştirebilirsiniz.
+> 
+> `ValidationService` sınıfını mevcut component içinde kullanabilmek için constructor metodunu aşağıdaki gibi düzenleyelim.
+> ```ts 
+> constructor(
+>    private animalService: AnimalService,
+>    private validationService: ValidationService
+> ) {}
+> ```
+> Şimdi de `getAllAnimals` metodunu düzenleyelim.
+> ```ts
+> getAllAnimals() {
+>    this.animalService.getAll().subscribe(
+>    (response) => {
+>        this.animals = response.data;
+>    },
+>    (responseError) => {
+>        this.validationService.showErrors(responseError);
+>    },
+>    () => {
+>       console.log('getAllAnimals() completed');
+>    }
+>    );
+> }
+> ```
+> Bu işlem eğer istek işlenirken hata meydana gelirse hata mesajını `ngx-toastr` yardımıyla görmemizi sağlayacktır. Dilerseniz bu sınıfı düzenleyerek hataları istediğiniz gibi yönetebilirsiniz.
+>
+> Son olarak `getAllAnimals` metodunu `ngOnInit()` metodu içinde çağıralım.
+>
+> `animal-list.component.ts` dosyamızın son hali aşağıdaki gibi olmalıdır.
+> ```ts
+> import { Component, OnInit } from '@angular/core';
+> import { ValidationService } from 'src/app/core/services/validation.service';
+> import { AnimalModel } from 'src/app/models/animalModel';
+> import { AnimalService } from 'src/app/services/animal.service';
+>
+> @Component({
+>  selector: 'app-animal-list',
+>  templateUrl: './animal-list.component.html',
+>  styleUrls: ['./animal-list.component.css'],
+> })
+> export class AnimalListComponent implements OnInit {
+>  animals: AnimalModel[];
+>
+>  constructor(
+>    private animalService: AnimalService,
+>    private validationService: ValidationService
+>  ) {}
+>
+>  ngOnInit(): void {
+>    this.getAllAnimals();
+>  }
+>
+>  getAllAnimals() {
+>    this.animalService.getAll().subscribe(
+>      (response) => {
+>        this.animals = response.data;
+>      },
+>      (responseError) => {
+>        this.validationService.showErrors(responseError);
+>      },
+>      () => {
+>        console.log('getAllAnimals() completed');
+>      }
+>    );
+>  }
+> }
+> ```
+> Şimdi ise `animals` değişkenini html sayfamızda görüntüleyelim.
+> 
+> `animal-list.component.html` dosyasını açıp içini silelim. Aşağıdaki kod bloğunu ekleyelim.
+> ```html
+> <div *ngIf="animals != null">
+>   <h5 *ngFor="let animal of animals; let i = index">
+>     {{ i }} | {{ animal.name }}
+>   </h5>
+> </div>
+> ```
+> Şimdi ise yaptığımız değişiklikleri görme vakti.
+> İlk önce API yi çalıştıralım. Daha sonra da `Visual Studio Code` üzerinde terminal açıp (açık terminal varsa kullanabilirsiniz) 
+> ```
+> ng serve --open
+> ```
+> Komutunu terminale yapıştıralım.
+>
+> `src->app` klasörü içindeki `app.component.html` dosyasının içine aşağıdaki kodu ekleyelim.
+> ```html
+> <app-animal-list></app-animal-list>
+> ``` 
+> `app.component.html` dosyasının son hali aşağıdaki gibi olmalıdır.
+> ```html
+> <div *ngIf="translateKeys != null">
+>   <router-outlet></router-outlet>
+> </div>
+> <app-animal-list></app-animal-list>
+> ```
+> Şimdi sayfayı yenileyip `F12` tuşuna basıp `Console` 'u açalım.
+> ![Open Console](tutorial-images/artchitecture-angular-open-console.png)
+>
+> Gördüğünüz gibi 'getAllAnimals() completed' mesajını aldık ekranda hiçbir şey göremememizin sebebi ise henüz veritabanında kayıtlı `Animal` nesnesinin bulunmaması.
+>
+> API üzerinden birkaç tane `Animal` nesnesi ekleyelim.
+> Bunu yapmak için API'yi açalım (Daha Fazla Bilgi için [Swagger Dökümanını İnceleyebilirsiniz](https://swagger.io/tools/swagger-ui/))
+> ![Add Animal](tutorial-images/artchitecture-angular-swagger-add-animal.png)
+> `NOT` id değerini sildiğimize dikkat edin aksi takdirde hata alırsınız.
+>
+> Bu şekilde bir kaç tane `Animal` ekleyelim.
+>
+> `NOT` Eğer aynı `name` ve `ownerName` özelliğine sahip birden fazla `Animal` eklemeye çalışırsanız daha önceden yazmış olduğumuz `İş Kuralı` çalışacak ve size engel olacaktır.
+>
+> `Animal` nesnelerini ekledikten sonra biraz önce hazırlamış olduğumuz sayfayı açalım ve sayfayı yenileyelim.
+> ![Example](tutorial-images/artchitecture-angular-show-animals.png)
+> Gördüğünüz gibi artık verileri de listeleyebiliyoruz.
 
 ### Componenti Sayfa Olarak Kullanma
-
-### Sayfaları Korumak
-
-### API ile Çalışma
 
 ---
 
@@ -864,8 +1186,6 @@
 ### Service Oluşturma
 
 ### Component (Widget) Oluşturma
-
-### API ile Çalışma
 
 ---
 
