@@ -1031,7 +1031,9 @@
 > `Component` bize bu aşamada kolaylık sağlar.
 > 
 > `src-app-components` klasörüne sağ tıklayıp `Open in Integrated Terminal` seçeneğini seçelim.
+>
 > ![Create Component](tutorial-images/artchitecture-angular-create-component.png)
+>
 > Açılan terminale aşağıdaki komutu yapıştıralım.
 > ```
 > ng generate component animal-list --skip-tests
@@ -1158,13 +1160,16 @@
 > <app-animal-list></app-animal-list>
 > ```
 > Şimdi sayfayı yenileyip `F12` tuşuna basıp `Console` 'u açalım.
+> 
 > ![Open Console](tutorial-images/artchitecture-angular-open-console.png)
 >
 > Gördüğünüz gibi 'getAllAnimals() completed' mesajını aldık ekranda hiçbir şey göremememizin sebebi ise henüz veritabanında kayıtlı `Animal` nesnesinin bulunmaması.
 >
 > API üzerinden birkaç tane `Animal` nesnesi ekleyelim.
 > Bunu yapmak için API'yi açalım (Daha Fazla Bilgi için [Swagger Dökümanını İnceleyebilirsiniz](https://swagger.io/tools/swagger-ui/))
+>
 > ![Add Animal](tutorial-images/artchitecture-angular-swagger-add-animal.png)
+>
 > `NOT` id değerini sildiğimize dikkat edin aksi takdirde hata alırsınız.
 >
 > Bu şekilde bir kaç tane `Animal` ekleyelim.
@@ -1172,7 +1177,9 @@
 > `NOT` Eğer aynı `name` ve `ownerName` özelliğine sahip birden fazla `Animal` eklemeye çalışırsanız daha önceden yazmış olduğumuz `İş Kuralı` çalışacak ve size engel olacaktır.
 >
 > `Animal` nesnelerini ekledikten sonra biraz önce hazırlamış olduğumuz sayfayı açalım ve sayfayı yenileyelim.
+>
 > ![Example](tutorial-images/artchitecture-angular-show-animals.png)
+>
 > Gördüğünüz gibi artık verileri de listeleyebiliyoruz.
 
 ### Componenti Sayfa Olarak Kullanma
@@ -1283,6 +1290,7 @@
 > Flutter projesini çalıştırmadan önce API'mizi mobil cihazlar için konfigüre etmeliyiz. Eğer API yayınlanmışsa buna ihtiyacınız yok ama eğer API localhost üzerinde çalışıyorsa sanal makineler (Web-Desktop hariç) localhosta erişemeyeceği için http isteklerinde sorun olacaktır.
 >
 > API'yi kapatalım ve çalıştırma butonun yanında bulunan küçük simgeye tıklayıp ortam olarak `WebAPIForMobile` seçelim ve çalıştıralım.
+>
 > ![API Configuration](tutorial-images/artchitecture-flutter-api-configuration.png)
 >
 > Bunu yaptıktan sonra tarayıcının açılmadığını göreceksiniz. Eğer console ekranında herhangi bir hatayla karşılaşmadıysanız API'niz çalışıyordur.
@@ -1293,6 +1301,7 @@
 > ipconfig
 > ```
 > Komutunu yazıyoruz.
+> 
 > ![Learn IP](tutorial-images/artchitecture-flutter-learn-ip.png)
 >
 > Şimdi ise bu ip adresini `lib->environments` klasörü içinde bulunan `api.dart` dosyasındaki gerekli yerlere yazıyoruz.
@@ -1762,6 +1771,7 @@
 > `NOT` Bun ve buna benzer bir hatayla karşılaştığımız zaman aynı adımları tekrarlamamız gerekiyor.
 >
 > Ekranınız aşağıdaki gibiyse tüm adımları başarıyla tamamlamışsınız demektir.
+> 
 > ![Example](tutorial-images/artchitecture-flutter-api-project.png)
 >
 > Daha Fazla Bilgi için [Flutter Dökümanını İnceleyebilirsiniz](https://flutter.dev/)
