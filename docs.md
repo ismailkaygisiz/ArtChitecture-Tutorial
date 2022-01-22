@@ -846,7 +846,7 @@
 ### Entity Modelleme
 > API tarafında oluşturduğumuz her nesnenin Client tarafında bir karşılığı olması bize geliştirme sürecinde kolaylıklar sağlayacaktır.
 >
-> İlk önce solution içinde bulunan `AngularUI` projesinin içinde bulunan angular-ui dosyasını `Visual Studio Code` editöründe açıyoruz.
+> İlk önce solution içinde bulunan `AngularUI` projesinin içinde bulunan `angular-ui` dosyasını `Visual Studio Code` editöründe açıyoruz.
 > Angular için gerekli konfigürasyonları kurulum kısmında yapmıştık eğer yapmadıysanız önce konfigürasyonları yapın.
 >
 > Projeyi `Visual Studio Code` editöründe açtıktan sonra `src->app->models` klasörüne sağ tıklayıp `New File` seçeneğini seçiyoruz ve oluşturacağımız dosyaya `animalModel.ts` ismini veriyoruz.
@@ -1272,13 +1272,321 @@
 > (Siz kendi port numaranıza göre adresi değiştirebilirsiniz)
 > 
 > Daha Fazla Bilgi için [Angular Dökümanını İnceleyebilirsiniz](https://angular.io)
+> 
 ---
 
 ## ArtChitecture.Flutter
 
 ### Entity Modelleme
+> İlk önce solution içinde bulunan `FlutterUI` projesinin içinde bulunan `flutter-ui` dosyasını `Android Studio` editöründe açıyoruz. Flutter için gerekli konfigürasyonları kurulum kısmında yapmıştık eğer yapmadıysanız önce konfigürasyonları yapın.
+>
+> Flutter projesini çalıştırmadan önce API'mizi mobil cihazlar için konfigüre etmeliyiz. Eğer API yayınlanmışsa buna ihtiyacınız yok ama eğer API localhost üzerinde çalışıyorsa sanal makineler (Web-Desktop hariç) localhosta erişemeyeceği için http isteklerinde sorun olacaktır.
+>
+> API'yi kapatalım ve çalıştırma butonun yanında bulunan küçük simgeye tıklayıp ortam olarak `WebAPIForMobile` seçelim ve çalıştıralım.
+> ![API Configuration](tutorial-images/artchitecture-flutter-api-configuration.png)
+>
+> Bunu yaptıktan sonra tarayıcının açılmadığını göreceksiniz. Eğer console ekranında herhangi bir hatayla karşılaşmadıysanız API'niz çalışıyordur.
+>
+> Şimdi yapmamız gereken ise local IP adresimizi öğrenmek (Bu adres bazen değişebilir).
+> Windows işletim sisteminde bunu öğrenmek için herhangi bir cmd (terminal) ekranına
+> ```
+> ipconfig
+> ```
+> Komutunu yazıyoruz.
+> ![Learn IP](tutorial-images/artchitecture-flutter-learn-ip.png)
+>
+> Şimdi ise bu ip adresini `lib->environments` klasörü içinde bulunan `api.dart` dosyasındaki gerekli yerlere yazıyoruz.
+>
+> Dosyanın son hali aşağıdaki gibi olmalıdır. (Kendinize göre düzenlemelisiniz)
+> ```dart
+> import 'dart:io';
+> 
+> /// Translates
+> Map? translates;
+> 
+> class Environments {
+>   /// API url.
+>   /// Example "https://api.example.com/api/"
+>   static const String API_URL =
+>       "https://192.168.1.33:5001/api/"; // Your IP Address for Development  // For Mobile 192.168.1.33 // For Web and Desktop localhost
+> 
+>   /// Base url.
+>   /// Example "https://api.example.com/"
+>   static const String BASE_URL =
+>       "https://192.168.1.33:5001/"; // Your IP Address for Development  // For Mobile 192.168.1.33 // For Web and Desktop localhost
+> 
+>   /// Base url for images.
+>   /// Example "https://api.example.com/"
+>   static const String BASE_URL_FOR_IMAGE =
+>       "https://192.168.1.33:5001"; // Your IP Address for Development  // For Mobile 192.168.1.33 // For Web and Desktop localhost
+> 
+>   /// Your Client Name
+>   /// Example "Flutter"
+>   static const String CLIENT_NAME = "Flutter";
+> }
+> 
+> class _DevelopmentModeHttpOverrides extends HttpOverrides {
+>   @override
+>   HttpClient createHttpClient(SecurityContext? context) {
+>     return super.createHttpClient(context)
+>       ..badCertificateCallback =
+>           (X509Certificate cert, String host, int port) => true;
+>   }
+> }
+> 
+> /// Development Mode For Http Requests
+> /// Don't Use This in Production Mode
+> class DevelopmentMode {
+>   DevelopmentMode() {
+>     HttpOverrides.global = _DevelopmentModeHttpOverrides();
+>   }
+> }
+> 
+> ```
+> Flutter projesini herhangi bir ortamda (sanal makinede) çalıştırın.
+>
+> Aşağıdaki ekran karşınıza çıktıysa Flutter projesini API ile çalışmaya hazır hale getirmeye başardınız demektir.
+> 
+> ![Example](tutorial-images/artchitecture-flutter-example-project.png)
+>
+> Şimdi yapmamız gereken `Animal` nesnesinin Flutter ortamındaki karşılığını oluşturmak.
+>
+> `lib->models` klasörüne sağ tıklayıp `New->Dart File` seçeneğini seçelim ve oluşturacağımız dosyaya `animal_model` ismini verelim.
+>
+> Dosyaya aşağıdaki kod bloğunu ekleyelim.
+> ```dart
+> import 'dart:convert';
+> 
+> import 'package:flutter_ui/core/models/entity.dart';
+> 
+> @entity
+> class AnimalModel {
+>   int? id;
+>   String? name;
+>   String? ownerName;
+> 
+>   AnimalModel(this.id, this.name, this.ownerName);
+> 
+>   factory AnimalModel.fromJson(Map<String, dynamic> json) {
+>     return AnimalModel(
+>       json["id"] as int?,
+>       json["name"] as String?,
+>       json["ownerName"] as String?,
+>     );
+>   }
+> 
+>   String toJson() {
+>     return json.encode({
+>       "id": id,
+>       "name": name,
+>       "ownerName": ownerName,
+>     });
+>   }
+> }
+> ```
+> `NOT` Flutter için, json ile çalışmak için gerçekten işlevli bir paket olmadığından json ile ilgili işlemleri bizim yapmamız gerekiyor.
+> 
+> Artık `Animal` nesnemiz için Flutter tarafında bir modelimiz var
 
 ### Service Oluşturma
+> Flutter tarafında API'ye istek atmak için `Dio` paketini kullanarak özelleştirilmiş bir `HttpClient` kullanıyoruz. Bunun sebebi normal `HttpClient`'a (http pakediyle gelen) göre daha gelişmiş olması.
+> 
+> `lib->services` klasörüne sağ tıklayıp `New->Dart File` seçeneğini seçip isim olarak `animal_service` veriyoruz.
+>
+> Daha sonra dosyanın içine aşağıdaki kod bloğunu ekliyoruz.
+> ```dart
+> import 'package:flutter_ui/core/models/delete_model.dart';
+> import 'package:flutter_ui/core/models/response/list_response_model.dart';
+> import 'package:flutter_ui/core/models/response/response_model.dart';
+> import 'package:flutter_ui/core/models/response/single_response_model.dart';
+> import 'package:flutter_ui/core/utilities/dependency_resolver.dart';
+> import 'package:flutter_ui/core/utilities/service_repository.dart';
+> import 'package:flutter_ui/models/animal_model.dart';
+> 
+> class AnimalService extends ServiceRepository<AnimalModel, int> {
+>   @override
+>   Future<ResponseModel> add(AnimalModel addModel) async {
+>     // TODO: implement add
+>     throw UnimplementedError();
+>   }
+> 
+>   @override
+>   Future<ResponseModel> delete(DeleteModel deleteModel) async {
+>     // TODO: implement delete
+>     throw UnimplementedError();
+>   }
+> 
+>   @override
+>   Future<ListResponseModel<AnimalModel>> getAll() async {
+>     // TODO: implement getAll
+>     throw UnimplementedError();
+>   }
+> 
+>   @override
+>   Future<SingleResponseModel<AnimalModel>> getById(int id) async {
+>     // TODO: implement getById
+>     throw UnimplementedError();
+>   }
+> 
+>   @override
+>   Future<ResponseModel> update(AnimalModel updateModel) async {
+>     // TODO: implement update
+>     throw UnimplementedError();
+>   }
+> }
+> ```
+> Şimdi metodlarımızın içlerini dolduralım.
+>
+> `Add` metodunu aşağıdaki gibi değiştirelim.
+> ```dart
+> @override
+> Future<ResponseModel> add(AnimalModel addModel) async {
+>     var response = await httpClient.post(
+>       "animals/add",
+>       body: addModel.toJson(),
+>     );
+> 
+>     return ResponseModel.fromJson(response);
+> }
+> ```
+> `Delete` metodunu aşağıdaki gibi değiştirelim.
+> ```dart
+> @override
+> Future<ResponseModel> delete(DeleteModel deleteModel) async {
+>     var response = await httpClient.post(
+>       "animals/delete",
+>       body: deleteModel.toJson(),
+>     );
+> 
+>     return ResponseModel.fromJson(response);
+> } 
+> ```
+> `Update` metodunu aşağıdaki gibi değiştirelim.
+> ```dart
+> @override
+> Future<ResponseModel> update(AnimalModel updateModel) async {
+>     var response = await httpClient.post(
+>       "animals/update",
+>       body: updateModel.toJson(),
+>     );
+> 
+>     return ResponseModel.fromJson(response);
+> }
+> ```
+> ``GetById` metodunu aşağıdaki gibi değiştirelim.
+> ```dart
+> @override
+> Future<SingleResponseModel<AnimalModel>> getById(int id) async {
+>     var response = await httpClient.get(
+>       "animals/getbyid?id=" + id.toString(),
+>     );
+>
+>     return SingleResponseModel.fromJson(response);
+> }
+> ```
+> `GetAll` metodunu aşağıdaki gibi değiştirelim.
+> ```dart
+> @override
+> Future<ListResponseModel<AnimalModel>> getAll() async {
+>     var response = await httpClient.get(
+>       "animals/getall",
+>     );
+>
+>     return ListResponseModel.fromJson(response);
+> }
+> ```
+> `GetByAnimalName` metodunu da ekleyelim.
+> ```dart
+> Future<ListResponseModel<AnimalModel>> getByAnimalName(String animalName) async{
+>     var response = await httpClient.get(
+>       "animals/getbyanimalname?animalName=" + animalName,
+>     );
+>
+>     return ListResponseModel.fromJson(response);
+> }
+> ```
+> Bütün işlemleri yaptıktan sonra dosyanın son hali aşağıdaki gibi olmalıdır.
+> ```dart
+> import 'package:flutter_ui/core/models/delete_model.dart';
+> import 'package:flutter_ui/core/models/response/list_response_model.dart';
+> import 'package:flutter_ui/core/models/response/response_model.dart';
+> import 'package:flutter_ui/core/models/response/single_response_model.dart';
+> import 'package:flutter_ui/core/utilities/dependency_resolver.dart';
+> import 'package:flutter_ui/core/utilities/service_repository.dart';
+> import 'package:flutter_ui/models/animal_model.dart';
+> 
+> class AnimalService extends ServiceRepository<AnimalModel, int> {
+>   @override
+>   Future<ResponseModel> add(AnimalModel addModel) async {
+>     var response = await httpClient.post(
+>       "animals/add",
+>       body: addModel.toJson(),
+>     );
+> 
+>     return ResponseModel.fromJson(response);
+>   }
+> 
+>   @override
+>   Future<ResponseModel> delete(DeleteModel deleteModel) async {
+>     var response = await httpClient.post(
+>       "animals/delete",
+>       body: deleteModel.toJson(),
+>     );
+> 
+>     return ResponseModel.fromJson(response);
+>   }
+> 
+>   @override
+>   Future<ResponseModel> update(AnimalModel updateModel) async {
+>     var response = await httpClient.post(
+>       "animals/update",
+>       body: updateModel.toJson(),
+>     );
+> 
+>     return ResponseModel.fromJson(response);
+>   }
+> 
+>   @override
+>   Future<SingleResponseModel<AnimalModel>> getById(int id) async {
+>     var response = await httpClient.get(
+>       "animals/getbyid?id=" + id.toString(),
+>     );
+> 
+>     return SingleResponseModel.fromJson(response);
+>   }
+> 
+>   @override
+>   Future<ListResponseModel<AnimalModel>> getAll() async {
+>     var response = await httpClient.get(
+>       "animals/getall",
+>     );
+> 
+>     return ListResponseModel.fromJson(response);
+>   }
+> 
+>   Future<ListResponseModel<AnimalModel>> getByAnimalName(String animalName) async{
+>     var response = await httpClient.get(
+>       "animals/getbyanimalname?animalName=" + animalName,
+>     );
+> 
+>     return ListResponseModel.fromJson(response);
+>   }
+> }
+> ```
+> Artık `Controller` nesnemizle tamamen eşleşen bir `Flutter Service` nesnemiz var.
+
+### Bağımlılıkları Çözme
+> Oluşturduğumuz `Service` sınıflarını alternatif olarak kullanabilmek için nesneleri önceden oluşturabiliriz.
+>
+> `lib->utilities` klasörü içinde bulunan `dependency_resolver.dart` dosyasını açıp içeriğini aşağıdaki gibi değiştirelim.
+> ```dart
+> import 'package:flutter_ui/services/animal_service.dart';
+>
+> /// Define yourself custom dependencies
+> /// Like core/utilities/dependency_resolver.dart
+>
+> final AnimalService animalService = AnimalService();
+> ```
 
 ### Component (Widget) Oluşturma
 
