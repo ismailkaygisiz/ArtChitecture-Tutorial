@@ -1176,7 +1176,102 @@
 > Gördüğünüz gibi artık verileri de listeleyebiliyoruz.
 
 ### Componenti Sayfa Olarak Kullanma
-
+> Bir önceki kısımda bir componenti başka bir componentin içinde nasıl çağıracağımızı gördük peki ya componenti sayfa olarak kullanmak istersek. İlk önce `app-component.html` dosyasını ilk haline getirelim.
+> 
+> `app.component.html` dosyasının son hali aşağıdaki gibi olmalıdır.
+> ```html
+> <div *ngIf="translateKeys != null">
+>   <router-outlet></router-outlet>
+> </div>
+> ```
+>
+> `src->app` klasörü içinde bulunan `app-routing.module.ts` dosyasını açalım.
+>  
+> `Routes` içine aşağıdaki kodu ekleyelim.
+> ```ts
+> {
+>   path: 'animals',
+>   component: AnimalListComponent,
+> },
+> ```
+> `app-routing.module.ts` dosyasının son hali aşağıdaki gibi olmalıdır.
+> ```ts
+> import { NgModule } from '@angular/core';
+> import { RouterModule, Routes } from '@angular/router';
+>
+> // guards
+> import { LoginDisableGuard } from './core/guards/login-disable.guard';
+> import { LoginGuard } from './core/guards/login.guard';
+> import { AdminGuard } from './core/guards/admin.guard';
+>
+> // layouts
+> import { AdminLayoutComponent } from './core/layouts/admin-layout/admin-layout.component';
+> import { AuthLayoutComponent } from './core/layouts/auth-layout/auth-layout.component';
+> import { MainLayoutComponent } from './core/layouts/main-layout/main-layout.component';
+>
+> // error
+> import { ErrorComponent } from './core/components/error/error.component';
+>
+> // admin
+> import { DashboardComponent } from './core/components/admin/dashboard/dashboard.component';
+>
+> // auth
+> import { AuthComponent } from './core/components/auth/auth/auth.component';
+> import { LoginComponent } from './core/components/auth/login/login.component';
+> import { RegisterComponent } from './core/components/auth/register/register.component';
+> import { AnimalListComponent } from './components/animal-list/animal-list.component';
+>
+> // main
+>
+> const routes: Routes = [
+>  {
+>    path: 'animals',
+>    component: AnimalListComponent,
+>  },
+>  {
+>    path: '',
+>    component: MainLayoutComponent,
+>    children: [],
+>  },
+>  {
+>    path: 'admin',
+>    component: AdminLayoutComponent,
+>    canActivate: [AdminGuard],
+>    children: [{ path: '', component: DashboardComponent }],
+>  },
+>  {
+>    path: 'auth',
+>    component: AuthLayoutComponent,
+>    children: [
+>      { path: '', component: AuthComponent },
+>      {
+>        path: 'login',
+>        component: LoginComponent,
+>        canActivate: [LoginDisableGuard],
+>      },
+>      {
+>        path: 'register',
+>        component: RegisterComponent,
+>        canActivate: [LoginDisableGuard],
+>      },
+>    ],
+>  },
+>  {
+>    path: '**',
+>    component: ErrorComponent,
+>  },
+> ];
+>
+> @NgModule({
+>  imports: [RouterModule.forRoot(routes)],
+>  exports: [RouterModule],
+> })
+> export class AppRoutingModule {}
+> ```
+> Şimdi tarayıcı üzerinde [http://localhost:4200/animals](http://localhost:4200/animals) adresine gidelim.
+> (Siz kendi port numaranıza göre adresi değiştirebilirsiniz)
+> 
+> Daha Fazla Bilgi için [Angular Dökümanını İnceleyebilirsiniz](https://angular.io)
 ---
 
 ## ArtChitecture.Flutter
