@@ -1589,48 +1589,180 @@
 > ```
 
 ### Component (Widget) Oluşturma
-
+> Uygulama içinde tasarım yapmak için Flutter'ın bize sağladığı Wigdetları kullanırız.
+> Bazen bir tasarımı birden fazla yerde kullanmamız gerekebilir. Bu gibi durumlarda kendi widget nesnemizi oluşturacağız ve bunları dilersek yazdığımız `Service` sınıflarıyla entegre çalışabilecek hale getireceğiz.
+> 
+> `lib->components` klasörüne sağ tıklayıp `New->Directory` seçeneğini seçelim ve isim olarak `animal_list` ismini verelim.
+> Daha sonra bu klasöre sağ tıklayıp `New->Dart File` seçeneğini seçelim ve isim olarak `animal_list_component` ismini verelim.
+> Sonra tekrar bu klasöre sağ tıklayıp `New->Dart File` seçeneğini seçelim ve bu sefer isim olarak `animal_list_widget` ismini verelim.
+>
+> `animal_list_component.dart` dosyasını açıp aşağıdaki kod bloğunu ekleyelim.
+> ```dart
+> import 'package:flutter_ui/core/utilities/component.dart';
+>
+> class AnimalListComponent implements Component {
+>   @override
+>   void whenComplete() {
+>     // TODO: implement whenComplete
+>   }
+> }
+> ```
+> `animal_list_widget.dart` dosyasını açıp aşağıdaki kod bloğunu ekleyelim.
+> ```dart
+> import 'package:flutter/material.dart';
+> import 'package:flutter_ui/components/animal_list/animal_list_component.dart';
+> 
+> class AnimalListWidget extends StatefulWidget {
+>   const AnimalListWidget({Key? key}) : super(key: key);
+> 
+>   @override
+>   _AnimalListWidgetState createState() => _AnimalListWidgetState();
+> }
+> 
+> class _AnimalListWidgetState extends State<AnimalListWidget> with AnimalListComponent {
+>   @override
+>   Widget build(BuildContext context) {
+>     return Container(
+>       color: Colors.red,
+>       height: 30,
+>       width: 30,
+>       child: Text("Hello"),
+>     );
+>   }
+> 
+>   @override
+>   void whenComplete() {
+>     super.whenComplete();
+>     if (mounted) setState(() {});
+>   }
+> }
+> ```
+> `NOT` whenComplete() metodu zorunlu olan bir metod değildir ve kullanımı büyük projeler için karmaşaya sebep olduğundan tavsiye edilmemektedir. Küçük çaplı uygulamalar için kullanılması tavsiye edilir. 
+>
+> Şimdi de service sınıfıyla entegre çalışalım.
+> 
+> `animal_list_component.dart` dosyasına aşağıdaki kodu ekleyelim.
+> ```dart
+> import 'package:flutter_ui/core/utilities/component.dart';
+> import 'package:flutter_ui/core/utilities/dependency_resolver.dart';
+> import 'package:flutter_ui/models/animal_model.dart';
+> import 'package:flutter_ui/utilities/dependency_resolver.dart';
+> 
+> class AnimalListComponent implements Component {
+>   List<AnimalModel>? animals;
+> 
+>   Future<void> getAllAnimals() async {
+>     var response = await animalService.getAll();
+> 
+>     if (!validationService.showErrors(response.jsonData)) {
+>       animals = response.data;
+>     }
+> 
+>     whenComplete();
+>   }
+> 
+>   @override
+>   void whenComplete() {
+>     // TODO: implement whenComplete
+>   }
+> }
+> ```
+> Tıpkı Angular tarafında olduğu gibi Flutter tarafında da bir `ValidationService` sınfıımız var. Angular tarafından farklı olarak aldığımız hataları sadece konsol ekranına basmaktadır. Eğer gönderdiğimiz `jsonData` içinde hata varsa `true` değerini bize döndürür.
+> 
+> Şimdi de `animal_list_widget.dart` dosyasını aşağıdaki şekilde olduğu gibi düzenleyelim.
+> ```dart
+> import 'package:flutter/material.dart';
+> import 'package:flutter_ui/components/animal_list/animal_list_component.dart';
+> import 'package:flutter_ui/components/platform_progress_indicator.dart';
+> 
+> class AnimalListWidget extends StatefulWidget {
+>   const AnimalListWidget({Key? key}) : super(key: key);
+> 
+>   @override
+>   _AnimalListWidgetState createState() => _AnimalListWidgetState();
+> }
+> 
+> class _AnimalListWidgetState extends State<AnimalListWidget> with AnimalListComponent {
+>   @override
+>   void initState() {
+>     // TODO: implement initState
+>     super.initState();
+>     getAllAnimals();
+>   }
+> 
+>   @override
+>   Widget build(BuildContext context) {
+>     return animals != null
+>         ? ListView.builder(
+>             itemCount: animals!.length,
+>             itemBuilder: (context, index) {
+>               return Text(
+>                 animals![index].id!.toString() + " | " + animals![index].name!,
+>               );
+>             },
+>           )
+>         : PlatformProgressIndicator();
+>   }
+> 
+>   @override
+>   void whenComplete() {
+>     super.whenComplete();
+>     if (mounted) setState(() {});
+>   }
+> }
+> ```
+> Dosyanın son hali yukarıdaki gibi olmalıdır.
+> 
+> Şimdi ise `Animal` nesnelerimizi görme zamanı.
+> 
+> `lib->pages->main->homePage` klasörü altında bulunan `home_page_screen.dart` dosyasını açalım ve aşağıdaki şekilde olduğu gibi düzenleyelim.
+> ```dart
+> import 'package:flutter/material.dart';
+> import 'package:flutter_ui/components/animal_list/animal_list_widget.dart';
+> import 'package:flutter_ui/pages/main/homePage/home_page_component.dart';
+> 
+> class HomePageScreen extends StatefulWidget {
+>   @override
+>   _HomePageScreenState createState() => _HomePageScreenState();
+> }
+> 
+> class _HomePageScreenState extends State<HomePageScreen> with HomePageComponent {
+>   int value = 0;
+> 
+>   @override
+>   void initState() {
+>     super.initState();
+>   }
+> 
+>   @override
+>   Widget build(BuildContext context) {
+>     return Scaffold(
+>       body: AnimalListWidget()
+>     );
+>   }
+> 
+>   @override
+>   void whenComplete() {
+>     if (mounted) setState(() {});
+>   }
+> }
+> ```
+> Projeyi tekrar başlatalım.
+>
+> "Unhandled Exception: Reflecting on type `AnimalModel` without capability" şeklinde veya buna benzer bir hata ile karşılaştıysanız endişelenmeyin hala yapmadığımız bir konfigürasyon var.
+>
+> Projeyi durduralım.`lib` klasörü içinde bulunan `main.reflectable.dart` dosyasını silelim.
+> Proje dizininde bulunan `commands.txt` dosyasını bulalım (Eğer bulamadıysanız aşağıdaki komutu kopyalayın)
+> ```
+> flutter packages pub run build_runner build
+> ```
+> Komutunu kopyalayıp proje dizini içinde terminal açıp yapıştıralım. Bu komut `main.reflectable.dart` dosyasını en son oluşturduğumuz entity için tekrar oluşturacaktır. (Reflection yapısı için gerekli)
+> Eğer hata almadıysanız projeyi tekrar çalıştırın.
+> 
+> `NOT` Bun ve buna benzer bir hatayla karşılaştığımız zaman aynı adımları tekrarlamamız gerekiyor.
+>
+> Ekranınız aşağıdaki gibiyse tüm adımları başarıyla tamamlamışsınız demektir.
+> ![Example](tutorial-images/artchitecture-flutter-api-project.png)
+>
+> Daha Fazla Bilgi için [Flutter Dökümanını İnceleyebilirsiniz](https://flutter.dev/)
 ---
-
-## İleri Seviye
-
-### Aspects
-
-#### Logging
-
-#### Caching
-
-#### Authorization
-
-#### Transaction
-
-#### Performance
-
-#### Validation
-
-#### Custom Aspect ve Interceptor
-
-### Extensions ve Extension Yazma
-
-### Helpers ve Helper Yazma
-
-### IHttpContextAccessor
-
-### IRequestUserService
-
-### ITranslateContext ile Çoklu Dil Desteği
-
-### Exceptions ve Errors
-
-### ServiceTool ve Modules
-
-### ITokenHelper ile Custom TokenHelper Oluşturma
-
-### Startup.cs Konfigürasyonu
-
-### SignalR Kullanarak Anlık Haberleşme
-
-## Yayınlama
-### ASP.Net Core
-### Angular
-### Flutter

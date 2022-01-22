@@ -1,5 +1,7 @@
 - [Hoş Geldiniz](/)
 - [Başlamadan Önce](before.md)
 - [Başlayalım](docs.md)
+- [İleri Seviye](advanced.md)
+- [Yayınlama](publish.md)
 - [ArtChitecture.Snippets](snippets.md)
 - [Hakkında](about.md)
